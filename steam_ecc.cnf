@@ -1,0 +1,27 @@
+[ req ]
+prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[ req_distinguished_name ]
+C = CN
+ST = Shanghai
+L = Shanghai
+O = Urlynn
+CN = Steam Proxy
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = store.steampowered.com
+DNS.2 = steamcommunity.com
+DNS.3 = www.steamcommunity.com
+DNS.4 = checkout.steampowered.com
+DNS.5 = api.steampowered.com
+DNS.6 = partner.steamgames.com
+DNS.7 = help.steampowered.com
+DNS.8 = steam-chat.com
