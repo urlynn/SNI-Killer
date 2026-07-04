@@ -1,0 +1,28 @@
+[ req ]
+prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[ req_distinguished_name ]
+C = CN
+ST = Shanghai
+L = Shanghai
+O = Urlynn
+CN = GitHub Proxy
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+# 主域名
+DNS.1 = github.com
+DNS.2 = *.github.com
+DNS.3 = *.github.io
+DNS.4 = *.githubusercontent.com
+DNS.5 = github.githubassets.com
+DNS.6 = analytics.githubassets.com
+DNS.7 = github.blog
+

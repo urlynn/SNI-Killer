@@ -59,6 +59,7 @@
   > DNS.4 = *.githubusercontent.com
   > DNS.5 = github.githubassets.com
   > DNS.6 = analytics.githubassets.com
+  > DNS.7 = github.blog
   > ```
 
   > `/etc/nginx/ca/steam/steam_ecc.cnf`
@@ -139,172 +140,14 @@
 
 - Nginx 反代
 
-  > `/etc/nginx/conf.d/github.conf`
+  > `/etc/nginx/conf.d/github.conf` — 见 [github.conf](./github.conf)
+
+- DNS 劫持
+
+  > `/etc/dnsmasq.d/github.conf` — 见 [github_dnsmasq.conf](./github_dnsmasq.conf)
   >
-  > ```shell
-  > # ==================== 上游服务器定义 ====================
-  > 
-  > # Group 1: github.com 上游
-  > upstream github_com {
-  >     server 20.27.177.113:443 ;
-  > }
-  > 
-  > upstream codeload_github_com {
-  >     server 20.27.177.114:443 ;
-  > }
-  > 
-  > # Group : api.github.com 上游
-  > upstream api_github_com {
-  >     server 20.27.177.116:443 ;
-  > }
-  > 
-  > # Group : githubusercontent 相关域名上游 (IPv6)
-  > upstream githubusercontent {
-  >     server [2606:50c0:8001::154]:443 ;
-  >     server [2606:50c0:8003::154]:443 ;
-  >     server [2606:50c0:8002::154]:443 ;
-  >     server [2606:50c0:8000::154]:443 ;
-  >     least_conn;
-  > }
-  > 
-  > upstream col_github_com {
-  >     server 140.82.112.21:443 ;
-  >     server 140.82.112.22:443 ;
-  >     server 140.82.113.21:443 ;
-  >     server 140.82.113.22:443 ;
-  >     server 140.82.114.22:443 ;
-  >     server 140.82.114.21:443 ;
-  >     least_conn;
-  > }
-  > 
-  > upstream redirect_github_com {
-  >     server 140.82.112.17:443 ;
-  >     server 140.82.113.17:443 ;
-  >     server 140.82.114.17:443 ;
-  >     server 140.82.112.18:443 ;
-  >     server 140.82.113.18:443 ;
-  >     server 140.82.114.18:443 ;
-  > }
-  > 
-  > upstream assets_cdn {
-  >     server [2606:50c0:8001::153]:443 ;
-  >     server [2606:50c0:8003::153]:443 ;
-  >     server [2606:50c0:8002::153]:443 ;
-  >     server [2606:50c0:8000::153]:443 ;
-  >     least_conn;
-  > }
-  > 
-  > upstream cloudflare {
-  >     server 1.0.0.1:443;
-  > }
-  > 
-  > map $host $default_http_host {
-  >     hostnames; 
-  >     default cloudflare; # almost always 403
-  >     github.com  github_com;
-  >     gist.github.com  github_com;
-  >     api.github.com  api_github_com;
-  >     codeload.github.com  col_github_com;
-  >     education.github.com  col_github_com;
-  >     enterprise.github.com  col_github_com;
-  >     classroom.github.com  col_github_com;
-  >     central.github.com  col_github_com;
-  >     collector.github.com  col_github_com;
-  >     redirect.github.com  redirect_github_com;
-  >     copilot.github.com  redirect_github_com;
-  >     services.github.com  redirect_github_com;
-  >     community.github.com  redirect_github_com;
-  >     assets-cdn.github.com  assets_cdn;
-  >     raw.github.com  githubusercontent;
-  >     lab.github.com  githubusercontent;
-  >     pages.github.com  githubusercontent;
-  >     resources.github.com  githubusercontent;
-  >     developer.github.com  githubusercontent;
-  >     partner.github.com  githubusercontent;
-  >     desktop.github.com  githubusercontent;
-  >     guides.github.com  githubusercontent;
-  >     support.github.com  githubusercontent;
-  >     *.github.io  githubusercontent;
-  >     *.github.com  githubusercontent;
-  >     analytics.githubassets.com  githubusercontent;
-  >     github.githubassets.com  githubusercontent;
-  >     *.githubusercontent.com  githubusercontent;
-  >     }
-  > # ==================== Server 块配置 ====================
-  > 
-  > server {
-  >     listen 443 ssl;
-  >     http2 on;
-  > 
-  >     server_name 
-  >         github.com
-  >         *.github.com
-  > 	    *.github.io
-  >         analytics.githubassets.com
-  >         github.githubassets.com
-  >         assets-cdn.github.com
-  >         *.githubusercontent.com;  
-  >     
-  >     ssl_certificate /etc/nginx/ca/github/github_ecc.crt;
-  >     ssl_certificate_key /etc/nginx/ca/github/github_ecc.key;
-  >     ssl_protocols TLSv1.3;
-  >     client_header_buffer_size 16k;
-  >     large_client_header_buffers 4 16k;
-  >     
-  >     location / {
-  >         proxy_pass https://$default_http_host;
-  >         proxy_set_header Host $http_host;
-  >         proxy_buffer_size 16k;
-  >         proxy_buffers 16 256k;     
-  >         proxy_busy_buffers_size 512k;
-  >         proxy_ssl_session_reuse on;
-  >     }
-  > }
-  > 
-  > server {
-  >     listen 443 ssl;
-  >     http2 on;
-  > 
-  >     server_name 
-  >         docs.github.com
-  >     
-  >     ssl_certificate /etc/nginx/ca/github/github_ecc.crt;
-  >     ssl_certificate_key /etc/nginx/ca/github/github_ecc.key;
-  >     ssl_protocols TLSv1.3;
-  >     client_header_buffer_size 16k;
-  >     large_client_header_buffers 4 16k;
-  >     
-  >     location / {
-  >         proxy_pass https://$default_http_host;
-  >         proxy_set_header Host $http_host;
-  >         proxy_buffer_size 16k;
-  >         proxy_buffers 16 256k;     
-  >         proxy_busy_buffers_size 512k;
-  >         proxy_ssl_session_reuse on;
-  >         proxy_hide_header Content-Security-Policy;
-  >         proxy_hide_header X-Content-Security-Policy;
-  >         proxy_hide_header X-WebKit-CSP;
-  >     }
-  > }
-  > 
-  > # HTTP 重定向到 HTTPS
-  > server {
-  >     listen 80;
-  >     server_name 
-  >         github.com
-  >         *.github.com
-  >         *.github.io
-  >         assets-cdn.github.com
-  >         analytics.githubassets.com
-  >         github.githubassets.com
-  >         *.githubusercontent.com;
-  >     
-  >     return 301 https://$host$request_uri;
-  > }
-  > ```
 
   > `/etc/nginx/conf.d/steam.conf`
-  >
   > ```shell
   > upstream steam_backend {
   >     server 23.56.181.190:443 weight=2 max_fails=3 fail_timeout=1s;
