@@ -140,113 +140,16 @@
 
 - Nginx 反代
 
-  > `/etc/nginx/conf.d/github.conf` — 见 [github.conf](./github.conf)
+  > `/etc/nginx/conf.d/github.conf` — 见 [github.conf](./nginx/github.conf)
 
 - DNS 劫持
 
-  > `/etc/dnsmasq.d/github.conf` — 见 [github_dnsmasq.conf](./github_dnsmasq.conf)
+  > `/etc/dnsmasq.d/github.conf` — 见 [github.conf](./dnsmasq/github.conf)
   >
 
-  > `/etc/nginx/conf.d/steam.conf`
-  > ```shell
-  > upstream steam_backend {
-  >     server 23.56.181.190:443 weight=2 max_fails=3 fail_timeout=1s;
-  >     server 23.56.181.177:443 weight=2 max_fails=3 fail_timeout=1s;
-  >     server 23.56.180.67:443 weight=2 max_fails=3 fail_timeout=1s;
-  >     server 23.56.180.179:443 weight=2 max_fails=3 fail_timeout=1s;
-  >     server 23.56.182.96:443 weight=2 max_fails=3 fail_timeout=1s;
-  >     least_conn;
-  > }
-  > 
-  > server 
-  > {
-  >     listen 443 ssl;
-  >     http2 on;
-  >     server_name store.steampowered.com steamcommunity.com;
-  >     ssl_certificate    /etc/nginx/ca/steam/steam_ecc.crt;
-  >     ssl_certificate_key    /etc/nginx/ca/steam/steam_ecc.key;
-  >     ssl_protocols TLSv1.3;
-  >     client_header_buffer_size 16k;
-  >     large_client_header_buffers 4 16k;
-  >         
-  >     location / {
-  >         proxy_pass https://steam_backend/;   
-  >         proxy_set_header Host $http_host;
-  >     }
-  > }
-  > ```
+  > `/etc/nginx/conf.d/steam.conf` — 见 [steam.conf](./nginx/steam.conf)
+  > `/etc/dnsmasq.d/steam.conf` — 见 [steam_dnsmasq.conf](./dnsmasq/steam.conf)
 
-  > `/etc/nginx/conf.d/pixiv.conf `
-  >
-  > ```shell
-  > upstream pixiv_net {
-  >     server 210.140.139.151:443 ;
-  >     server 210.140.139.158:443 ;
-  >     server 210.140.139.161:443 ;
-  >     server 210.140.139.159:443 ;
-  >     server 210.140.139.162:443 ;
-  >     least_conn;
-  > }
-  > 
-  > upstream pximg_net {
-  >     server 210.140.139.135:443 ;
-  >     server 210.140.139.136:443 ;
-  >     server 210.140.139.133:443 ;
-  >     server 210.140.139.138:443 ;
-  >     server 210.140.139.137:443 ;
-  >     server 210.140.139.130:443 ;
-  >     server 210.140.139.131:443 ;
-  >     server 210.140.139.132:443 ;
-  >     least_conn;
-  > }
-  > 
-  > server {
-  >     listen 443 ssl;
-  >     http2 on;
-  >     server_name
-  >         pixiv.net
-  >         *.pixiv.net
-  > 				oauth.secure.pixiv.net
-  >         *.fanbox.cc;
-  >     #client_max_body_size 50M;
-  >     ssl_certificate    /etc/nginx/ca/pixiv/pixiv_ecc.crt;
-  >     ssl_certificate_key    /etc/nginx/ca/pixiv/pixiv_ecc.key;
-  >     ssl_protocols TLSv1.3;
-  >     client_header_buffer_size 16k;
-  >     large_client_header_buffers 4 16k;
-  >         
-  >     location / {
-  >         proxy_pass https://pixiv_net/;   
-  >         proxy_set_header Host $http_host;
-  > 				proxy_buffering off;
-  >     }
-  >     # Proxying WebSockets
-  >     location /ws/ {
-  >         proxy_pass https://pixiv_net;
-  >         proxy_set_header Upgrade $http_upgrade;
-  >         proxy_set_header Connection "upgrade";
-  >     }
-  > }
-  > 
-  > server {
-  >     listen 443 ssl;
-  >     http2 on;
-  >     server_name *.pximg.net;
-  > 
-  >     ssl_certificate    /etc/nginx/ca/pixiv/pixiv_ecc.crt;
-  >     ssl_certificate_key    /etc/nginx/ca/pixiv/pixiv_ecc.key;
-  >     ssl_protocols TLSv1.3;
-  >     client_header_buffer_size 16k;
-  >     large_client_header_buffers 4 16k;
-  >         
-  >     location / {
-  >         proxy_pass https://pximg_net/;   
-  >         proxy_set_header Host $http_host;
-  >         proxy_next_upstream_timeout 60;
-  >         proxy_set_header Referer "https://www.pixiv.net/";
-  >         proxy_set_header Sec-Fetch-Site "cross-site";
-  >         allow all;
-  >     }
-  > }
-  > ```
+  > `/etc/nginx/conf.d/pixiv.conf` — 见 [pixiv.conf](./nginx/pixiv.conf)
+  > `/etc/dnsmasq.d/pixiv.conf` — 见 [pixiv_dnsmasq.conf](./dnsmasq/pixiv.conf)
 
